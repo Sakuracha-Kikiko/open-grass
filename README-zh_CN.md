@@ -116,7 +116,7 @@ community, while still allowing source code to be easily modified and shared.
 
 ![SuperExcellentQuilt](docs/modal.webp)
 
-优秀得都要死掉了呢。
+优秀得都要死掉了呢，你后面的模组怎么又转头支持 Fabric 去了？
 
 > 顺带一提，这个版本除了弹窗之外其实根本不能在 Fabric 上启动，点 Close 会直接结束 JVM，就算绕过去了，`MainMixin` 也会导致整个游戏入口被吃掉，游戏永远不会启动，再就算又绕过去了，它在什么地方调用 Quilt 的 API 的时候 Mixin 注入失败依然会崩溃。详见 [LambdAurora 此生最伟大的代码](docs/MigrationNotice.java)
 

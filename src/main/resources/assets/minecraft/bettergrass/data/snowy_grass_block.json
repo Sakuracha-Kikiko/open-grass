@@ -1,0 +1,23 @@
+{
+  "layers": [
+    {
+      "textures": {
+        "top": "minecraft:block/snow",
+        "side": "minecraft:block/grass_block_snow"
+      }
+    },
+    {
+      "textures": {
+        "top": "open_grass:block/snow_outline",
+        "side": "open_grass:block/transparent",
+        "overrides": {
+          "connect": "open_grass:block/transparent"
+        }
+      },
+      "masks": {
+        "blend_up": "open_grass:bettergrass/mask/snowy_grass_block_side_outline_blend_up",
+        "arch": "open_grass:bettergrass/mask/snowy_grass_block_side_outline_arch_blend"
+      }
+    }
+  ]
+}

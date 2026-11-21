@@ -139,9 +139,9 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-// This block of code expands all declared replace properties in the specified resource targets.
-// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
-var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+// This block of code expands all the declared replace properties in the mod metadata file only, so the
+// binary resources (textures, ...) are copied verbatim.
+processResources {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             minecraft_version_range: minecraft_version_range,
@@ -155,15 +155,10 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_description        : mod_description,
     ]
     inputs.properties replaceProperties
-    expand replaceProperties
-    from "src/main/resources"
-    into "build/generated/sources/modMetadata"
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand replaceProperties
+    }
 }
-// Include the output of "generateModMetadata" as an input directory for the build
-// this works with both building through Gradle and the IDE.
-sourceSets.main.resources.srcDir generateModMetadata
-// To avoid having to run "generateModMetadata" manually, make it run on every project reload
-neoForge.ideSyncTask generateModMetadata
 
 // Example configuration to allow publishing using the maven-publish plugin
 publishing {

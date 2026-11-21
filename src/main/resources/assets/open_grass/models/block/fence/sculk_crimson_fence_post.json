@@ -1,0 +1,7 @@
+{
+  "parent": "open_grass:block/template/sculk_fence_post",
+  "textures": {
+    "texture": "open_grass:block/fence/sculk_crimson_fence_post",
+    "planks": "minecraft:block/crimson_planks"
+  }
+}

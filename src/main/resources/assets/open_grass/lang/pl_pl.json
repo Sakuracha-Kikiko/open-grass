@@ -1,0 +1,12 @@
+{
+  "open_grass.menu.info.1": "Ta modyfikacja używa paczki zasobów, aby określić, które bloki zostają zmienione.",
+  "open_grass.menu.info.2": "To oznacza, że chcąc włączyć lub wyłączyć ładniejszy śnieg/trawę na wybranych blokach,",
+  "open_grass.menu.info.3": "musi być to zmodyfikowane, używając paczek zasobów.",
+  "open_grass.menu.info.read_more": "Dowiedź się więcej na: %s",
+  "open_grass.menu.title": "Konfiguracja LambdaBetterGrass",
+  "open_grass.menu.title.info": "Jak działa ta modyfikacja?",
+  "open_grass.option.better_snow": "Ładniejszy śnieg",
+  "open_grass.option.mode": "Ładniejsza trawa",
+  "open_grass.tooltip.better_snow": "Aktywuje opcję ładniejszego śnieg.\nJeśli włączone, niektóre bloki mogą mieć ośnieżoną wariację oraz/lub dodatkową warstwę śniegu, jeśli śnieg znajduje się w pobliżu.\nNotka: to działa również z innymi ośnieżonymi blokami, które mają warstwy, o ile występują wymagane pliki.",
+  "open_grass.tooltip.mode": "Aktywuje opcję ładniejszej trawy.\n - %s deaktywuje ładniejszą trawę całkowicie.\n - %s skopiuje górną teksturę trawy na wszystkie jej boki. Podobne do szybkiej opcji w OptiFine.\n - %s będzie łączyć tekstury bloku trawy podobnie do dokładnej opcji w OptiFine.\n - %s będzie łączyć tekstury trawy oraz wygładzać boczne tekstury pobliskich bloków trawy."
+}

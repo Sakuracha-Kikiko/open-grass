@@ -1,0 +1,12 @@
+{
+  "open_grass.menu.info.1": "Die Mod verwendet Ressourcenpaket-Dateien, um zu bestimmen, welche Blöcke betroffen sind.",
+  "open_grass.menu.info.2": "Das bedeutet, die Funktion „Besseres Gras/Schnee“ für Blöcke zu aktivieren oder zu deaktivieren",
+  "open_grass.menu.info.3": "es muss mit Ressourcenpaketen modifiziert werden.",
+  "open_grass.menu.info.read_more": "Lese hier mehr: %s",
+  "open_grass.menu.title": "LambdaBetterGrass Konfiguration",
+  "open_grass.menu.title.info": "Wie funktioniert die Mod?",
+  "open_grass.option.better_snow": "Besserer Schnee",
+  "open_grass.option.mode": "Besseres Gras",
+  "open_grass.tooltip.better_snow": "Aktiviert die „Besserer Schnee“ Funktion.\nWenn diese Funktion aktiv ist, wird bei einigen Blöcken möglicherweise eine Schneevariante verwendet und/oder eine Schneeschicht hinzugefügt, wenn Schnee in der Nähe ist.\nHinweis: Dies funktioniert auch bei andere schneeähnliche Blöcke mit Ebenen, solange die richtigen Dateien vorhanden sind.",
+  "open_grass.tooltip.mode": "Aktiviert die „Besseres Gras“ Funktion.\n - %s deaktiviert die Funktion „Besseres Gras“ komplett.\n - %s kopiert die obere Textur auf alle Seiten des Grasblocks. Ähnlich der „Fast“ Einstellung von OptiFine.\n - %s verbindet die Grasblocktexturen wie die „Fancy“ Einstellung von OptiFine.\n - %s verbindet die Grasblocktexturen und rundet die Seitentexturen benachbarter Grasblöcke ab."
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "open_grass:block/template/mossy_fence_side",
+  "textures": {
+    "texture": "open_grass:block/fence/mossy_warped_fence_side"
+  }
+}

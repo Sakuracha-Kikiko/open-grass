@@ -1,0 +1,6 @@
+{
+  "parent": "open_grass:block/template/mossy_fence_post",
+  "textures": {
+    "texture": "open_grass:block/fence/mossy_acacia_fence_post"
+  }
+}

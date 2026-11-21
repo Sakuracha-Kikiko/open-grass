@@ -1,0 +1,7 @@
+{
+  "parent": "open_grass:block/fence/template/bamboo_fence_side_east",
+  "textures": {
+    "texture": "open_grass:block/fence/mossy_bamboo_fence",
+    "top": "minecraft:block/moss_block"
+  }
+}

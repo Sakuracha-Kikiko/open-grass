@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "textures": {
+        "top": "minecraft:block/mycelium_top",
+        "side": "minecraft:block/mycelium_side",
+        "overrides": {
+          "blend_up": "open_grass:block/mycelium/mycelium_blend_up",
+          "blend_up_m": "open_grass:block/mycelium/mycelium_blend_up_m",
+          "arch": "open_grass:block/mycelium/mycelium_side_arch"
+        }
+      }
+    }
+  ]
+}

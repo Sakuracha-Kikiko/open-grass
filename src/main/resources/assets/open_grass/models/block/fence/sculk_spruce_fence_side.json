@@ -1,0 +1,6 @@
+{
+  "parent": "open_grass:block/template/sculk_fence_side",
+  "textures": {
+    "texture": "open_grass:block/fence/sculk_spruce_fence_side"
+  }
+}

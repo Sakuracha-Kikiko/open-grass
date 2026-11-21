@@ -1,42 +1,94 @@
-package com.example.examplemod;
+package com.sakuracha.opengrass;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Neo's config APIs
-public class Config {
+/**
+ * The client configuration of Open Grass.
+ *
+ * @author Sakuracha Kikiko
+ */
+public final class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec.EnumValue<LBGMode> MODE;
+    public static final ModConfigSpec.BooleanValue BETTER_SNOW;
+    public static final ModConfigSpec SPEC;
 
-    public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
+    static {
+        BUILDER.push("better_grass");
+        MODE = BUILDER
+                .comment("The better grass mode.", "Available values: OFF, FASTEST, FAST, FANCY.")
+                .defineEnum("mode", LBGMode.FANCY);
+        BETTER_SNOW = BUILDER
+                .comment("Whether the better snow feature is enabled.")
+                .define("better_snow", true);
+        BUILDER.pop();
+        SPEC = BUILDER.build();
+    }
 
-    public static final ModConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
+    private static volatile LBGMode mode = LBGMode.FANCY;
+    private static volatile boolean betterSnow = true;
 
-    public static final ModConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
+    private Config() {
+    }
 
-    // a list of strings that are treated as resource locations for items
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
+    public static synchronized LBGMode mode() {
+        return mode;
+    }
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+    public static synchronized boolean betterSnow() {
+        return betterSnow;
+    }
 
-    private static boolean validateItemName(final Object obj) {
-        return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
+    public static void setMode(LBGMode value) {
+        mode = value;
+        try {
+            MODE.set(value);
+            SPEC.save();
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
+    public static void setBetterSnow(boolean value) {
+        betterSnow = value;
+        try {
+            BETTER_SNOW.set(value);
+            SPEC.save();
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
+    /**
+     * Resets the configuration to its default values.
+     */
+    public static void reset() {
+        setMode(LBGMode.FANCY);
+        setBetterSnow(true);
+    }
+
+    public static void onLoading(ModConfigEvent.Loading event) {
+        refresh(event);
+    }
+
+    public static void onReloading(ModConfigEvent.Reloading event) {
+        refresh(event);
+    }
+
+    private static void refresh(ModConfigEvent event) {
+        if (event.getConfig().getSpec() != SPEC) {
+            return;
+        }
+
+        try {
+            mode = MODE.get();
+        } catch (IllegalStateException e) {
+            mode = LBGMode.FANCY;
+        }
+
+        try {
+            betterSnow = BETTER_SNOW.get();
+        } catch (IllegalStateException e) {
+            betterSnow = true;
+        }
     }
 }

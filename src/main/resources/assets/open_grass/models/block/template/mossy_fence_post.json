@@ -1,0 +1,7 @@
+{
+  "parent": "open_grass:block/template/fence_post",
+  "textures": {
+    "particle": "#texture",
+    "top": "minecraft:block/moss_block"
+  }
+}
