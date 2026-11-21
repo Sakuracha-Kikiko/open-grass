@@ -99,10 +99,12 @@ public final class LBGLayer {
         connectMaskImage.close();
 
         var blendUpMaskImage = LBGTextureGenerator.getNativeImage(resourceManager, this.blendUpMask);
-        var blendUp = LBGTextureGenerator.applyMask(side, top, blendUpMaskImage);
+        this.register("blend_up", LBGTextureGenerator.applyMask(side, top, blendUpMaskImage), name);
+        // Mirror the mask, not the composed texture: only the grass shape may flip, the dirt below it must stay as-is.
+        var mirroredBlendUpMaskImage = LBGTextureGenerator.mirrorImage(blendUpMaskImage);
         blendUpMaskImage.close();
-        this.register("blend_up", blendUp, name);
-        this.register("blend_up_m", LBGTextureGenerator.mirrorImage(blendUp), name);
+        this.register("blend_up_m", LBGTextureGenerator.applyMask(side, top, mirroredBlendUpMaskImage), name);
+        mirroredBlendUpMaskImage.close();
 
         var archMaskImage = LBGTextureGenerator.getNativeImage(resourceManager, this.archMask);
         this.register("arch", LBGTextureGenerator.applyMask(side, top, archMaskImage), name);
