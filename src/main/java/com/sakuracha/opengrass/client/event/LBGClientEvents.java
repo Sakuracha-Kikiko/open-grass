@@ -63,7 +63,10 @@ public final class LBGClientEvents {
 
         var models = event.getModels();
         var sprites = event.getTextureGetter();
-        var baker = new LBGModelBaker(resourceManager, sprites);
+        // Snapshot the baked models before wrapping any of them, as the models of the layer display states
+        // have to be the vanilla ones and not the wrappers added below.
+        var bakedModels = Map.copyOf(models);
+        var baker = new LBGModelBaker(resourceManager, sprites, bakedModels);
         var stateCache = new HashMap<Block, Map<String, BlockState>>();
 
         // The states which provide the snowy model variant have to be wrapped first so the normal variant can

@@ -57,7 +57,7 @@ public final class LBGLayerBakedModel extends BakedModelWrapper<BakedModel> {
         var pos = context.pos();
 
         for (var metadata : this.metadatas) {
-            if (LayeredBlockUtils.getNearbyLayeredBlocks(level, pos, metadata.layerType().block(), state.getBlock(), false) <= 1) {
+            if (LayeredBlockUtils.getNearbyLayeredBlocks(level, pos, metadata.layerType(), state.getBlock(), false) <= 1) {
                 continue;
             }
 
@@ -71,7 +71,11 @@ public final class LBGLayerBakedModel extends BakedModelWrapper<BakedModel> {
 
             var result = new ArrayList<BakedQuad>();
             if (layer) {
-                result.addAll(LBGQuadUtil.prepareLayerQuads(layerModel.getQuads(state, side, rand, data, renderType),
+                // The layer is the model of a block state of the game, so it has to be queried with its own state.
+                // A null render type is passed on purpose: the layer is emitted in the render types of the block it
+                // covers, while models such as multipart ones filter their quads on the render type they support.
+                result.addAll(LBGQuadUtil.prepareLayerQuads(
+                        layerModel.getQuads(metadata.layerType().displayState(), side, rand, ModelData.EMPTY, null),
                         state.getOffset(level, pos)));
             }
 

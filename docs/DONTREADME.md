@@ -45,12 +45,35 @@ com.sakuracha.opengrass
 - **`getModelData` 上的额外修复**：上游 FRAPI 直接把 `world`/`pos` 传给 `emitBlockQuads`；
   NeoForge 只能经 `ModelData` 传递，因此 `LBGBakedModel` 与 `LBGLayerBakedModel` 都会写入
   `LBGData.BLOCK_CONTEXT`（栅栏、苔藓地毯这类 `layer` 状态的外层包装正是后者）。
+- **层类型改为渲染原版方块状态**：1.5.2 给每种层烘焙一份自定义模型（`snowy_layer`、`mossy_layer`、
+  `sculky_layer`），换资源包不会跟着变，剔除行为也不好；这里改成直接渲染该层对应的原版方块状态
+  （见下面的「layer type 格式」），三个自定义模型文件随之删除。
 - **`layer_types/ash.json`** 指向 `cinderscapes:ash`，未安装时自动跳过（日志里只加载 3 个 layer type）。
 - **1.21.1 改名**：`states/grass.json`、`data/grass.json` 已按 `short_grass` 处理；
   上游 `resourcepacks/default` 里的 `materialmaps` 是 Canvas 渲染器的材质映射（不是 OptiFine），已移除；
   该内置包的内容已并入模组 assets（见下面的「关于「资源包」」）。
 - **`cave_vines_head`、`skeleton_head`、`weeping_wines`、`wither_skeleton_head`** 并不存在对应方块，加载时跳过
   （272 = 276 − 4，与上游 1.20.1 上的行为一致）。
+
+## layer type 格式
+
+`assets/open_grass/bettergrass/layer_types/*.json` 定义一个「覆盖层」（雪、苔藓、幽匿脉络……）：
+
+| 键 | 说明 |
+| --- | --- |
+| `block` | 必填，该层对应的方块；也用于读取默认渲染层 |
+| `display` | 实际渲染的方块状态，如 `minecraft:sculk_vein[down=true]`；缺省为 `block` 的默认状态 |
+| `match` | 哪些方块算作这一层，可写方块 id 或 `#tag`，也可写成数组；缺省只匹配 `block` 本身 |
+| `model` | 旧格式：改用自定义模型渲染（1.5.2 的写法，保留以兼容旧资源包） |
+| `render_layer` | 旧格式：`block` 的渲染层不在 `accepted` 里时强制改成 `default` |
+
+本移植的三个层都用 `display`：
+
+- `snow` → `minecraft:snow`（默认 `layers=1`，2px 厚）
+- `moss` → `minecraft:moss_carpet`
+- `sculk` → `minecraft:sculk_vein[down=true]`（原版模型旋转 90° 后的贴面，落在方块底部 2px 处）
+
+这样覆盖层完全跟随资源包：换了材质包、改了方块模型，层也跟着变；也不用再自己维护一份模型。
 
 ## 关于「资源包」
 
@@ -99,6 +122,8 @@ export JAVA_HOME=/path/to/jdk21
   `FANCY` 与 `OFF` 下的对比：前者台阶侧面被草贴图完全覆盖，后者是原版泥土。
 - `docs/screenshots/better_snow_fence.png` 是雪地上的橡木栅栏，可见栅栏顶部与横杆上的积雪层
   （来自并入模组 assets 的内联 `block_state` multipart 模型）。
+- `docs/screenshots/layer_sculk.png` 是幽匿脉络层的俯视图：四个 `sculk_vein` 方块围着一根圆石墙，
+  墙所在格子的底部同样被铺满——这层直接渲染原版 `minecraft:sculk_vein[down=true]`，不再用自定义模型。
 
 ## 尚未完成 / 已知限制
 
@@ -106,5 +131,6 @@ export JAVA_HOME=/path/to/jdk21
 - 上游 `resourcepacks/32x` 只有 `pack.mcmeta` + `pack.png`（512×512 图标）三个条目，是空壳占位包，本移植未复刻，因此资源包界面里看不到它。
 - 不支持 Canvas 渲染器的 `materialmaps`；上游那三份（`bamboo`、`bamboo_sapling`、`grass`）已删除，NeoForge 上没有对应机制。
 - 上游主 jar 还内置了 26 个 `assets/cinderscapes/bettergrass/states` + 26 个 `data` 兼容数据，本移植未搬运（只保留了 `layer_types/ash.json`）；未安装 Cinderscapes 时无影响。
-- `layer_types/ash.json` 依赖 `cinderscapes`，未安装时该 layer 不生效。
+- `layer_types/ash.json` 依赖 `cinderscapes`，未安装时该 layer 不生效；它仍是 1.5.2 的自定义模型写法，
+  用来验证 `model` 这条兼容路径。
 - 设置界面只暴露 `mode` 与 `better_snow`（与上游一致），没有复用上游 SpruceUI 的样式。

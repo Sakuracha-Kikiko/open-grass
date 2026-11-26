@@ -1,4 +1,5 @@
 {
   "block": "minecraft:snow",
-  "model": "open_grass:block/snowy_layer"
+  "display": "minecraft:snow",
+  "match": [ "minecraft:snow" ]
 }

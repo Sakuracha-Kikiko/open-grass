@@ -64,7 +64,10 @@ public final class LBGLayerMetadata {
         BakedModel layer = null;
         if (this.layerModel) {
             if (!this.layerModelBaked) {
-                this.bakedLayerModel = baker.bake(this.layerType.modelId(), BlockModelRotation.X0_Y0, sprites);
+                var legacyModelId = this.layerType.legacyModelId();
+                this.bakedLayerModel = legacyModelId != null
+                        ? baker.bake(legacyModelId, BlockModelRotation.X0_Y0, sprites)
+                        : baker.bakeState(this.layerType.displayState());
                 this.layerModelBaked = true;
             }
             layer = this.bakedLayerModel;

@@ -3,6 +3,7 @@ package com.sakuracha.opengrass.client.util;
 import com.sakuracha.opengrass.Config;
 import com.sakuracha.opengrass.client.LBGData;
 import com.sakuracha.opengrass.client.metadata.LBGLayerState;
+import com.sakuracha.opengrass.client.metadata.LBGLayerType;
 import java.util.List;
 import java.util.function.DoublePredicate;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -92,6 +93,48 @@ public final class LayeredBlockUtils {
                     count++;
                 }
             } else if (block == layerBlock) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    /**
+     * Counts the blocks of the given type around the given position which are covered by the given layer type.
+     *
+     * @param level the level
+     * @param pos the position
+     * @param layerType the layer type
+     * @param type the type of the blocks to check
+     * @param onlySourceBlock whether only the layer blocks should be considered
+     * @return the amount of nearby layered blocks
+     */
+    public static int getNearbyLayeredBlocks(BlockAndTintGetter level, BlockPos pos, LBGLayerType layerType, Block type,
+            boolean onlySourceBlock) {
+        int count = 0;
+
+        for (var direction : HORIZONTAL_DIRECTIONS) {
+            var offsetPos = pos.relative(direction);
+            var offsetState = level.getBlockState(offsetPos);
+
+            if (offsetState.getBlock() == type && !onlySourceBlock) {
+                if (getNearbyBlockLayers(level, offsetPos, layerType) > 1) {
+                    count++;
+                }
+            } else if (layerType.matches(offsetState)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static int getNearbyBlockLayers(BlockAndTintGetter level, BlockPos pos, LBGLayerType layerType) {
+        int count = 0;
+
+        for (var direction : HORIZONTAL_DIRECTIONS) {
+            if (layerType.matches(level.getBlockState(pos.relative(direction)))) {
                 count++;
             }
         }

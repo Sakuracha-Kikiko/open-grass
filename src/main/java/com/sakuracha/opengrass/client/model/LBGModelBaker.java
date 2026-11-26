@@ -1,10 +1,12 @@
 package com.sakuracha.opengrass.client.model;
 
+import com.sakuracha.opengrass.OpenGrass;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -15,6 +17,7 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,13 +28,44 @@ import org.jetbrains.annotations.Nullable;
 public final class LBGModelBaker implements ModelBaker {
     private final ResourceManager resourceManager;
     private final java.util.function.Function<Material, TextureAtlasSprite> sprites;
+    private final @Nullable Map<ModelResourceLocation, BakedModel> vanillaModels;
     private final Map<ResourceLocation, UnbakedModel> models = new HashMap<>();
     private final Map<CacheKey, BakedModel> bakedModels = new HashMap<>();
     private final Set<ResourceLocation> loading = new HashSet<>();
 
     public LBGModelBaker(ResourceManager resourceManager, java.util.function.Function<Material, TextureAtlasSprite> sprites) {
+        this(resourceManager, sprites, null);
+    }
+
+    public LBGModelBaker(ResourceManager resourceManager, java.util.function.Function<Material, TextureAtlasSprite> sprites,
+            @Nullable Map<ModelResourceLocation, BakedModel> vanillaModels) {
         this.resourceManager = resourceManager;
         this.sprites = sprites;
+        this.vanillaModels = vanillaModels;
+    }
+
+    /**
+     * Returns the already baked model of the given block state.
+     *
+     * <p>Layer types render a block state of the game, so the model of that state is already baked by the model
+     * bakery when the baking result is modified. Reusing it keeps the layer in sync with resource packs and avoids
+     * baking a model a second time.</p>
+     *
+     * @param state the block state
+     * @return the baked model, or {@code null} if it is not available
+     */
+    public @Nullable BakedModel bakeState(BlockState state) {
+        if (this.vanillaModels == null) {
+            return null;
+        }
+
+        var location = BlockModelShaper.stateToModelLocation(state);
+        var model = this.vanillaModels.get(location);
+        if (model == null) {
+            OpenGrass.LOGGER.warn("Missing baked model for the layer display state {}.", location);
+        }
+
+        return model;
     }
 
     @Override
