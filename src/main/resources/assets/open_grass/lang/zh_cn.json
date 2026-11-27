@@ -2,7 +2,7 @@
   "open_grass.menu.info.1": "本模组通过资源包来决定哪些方块可以应用这些效果。",
   "open_grass.menu.info.2": "也就是说，想在哪些方块上启用或者关闭这些功能，",
   "open_grass.menu.info.3": "得在资源包中添加，修改或者删除对应方块的相关文件才行。",
-  "open_grass.menu.info.read_more": "欲知详情请访问：你自己找去吧，没有宣传 LambdAurora 的义务",
+  "open_grass.menu.info.read_more": "欲知详情请访问：%s",
   "open_grass.menu.title": "Open Grass 配置",
   "open_grass.menu.title.info": "本模组功能的实现方式",
   "open_grass.option.better_snow": "更好的雪地",
