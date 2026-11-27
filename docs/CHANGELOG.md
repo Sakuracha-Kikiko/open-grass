@@ -1,5 +1,23 @@
 # Open Grass Changelog
 
+## 1.5.2.3
+
+- Added the `glow_lichen` layer type: glow lichen (the `down=true` state) is
+  drawn on blocks next to it, like snow and sculk.
+- `match` now accepts block state selectors with properties, e.g.
+  `minecraft:glow_lichen[down=true]`.
+- Data coverage: 43 new `states` and 24 new `data` files (candle cakes,
+  copper doors and trapdoors including the waxed variants, mud/polished
+  tuff/tuff/tuff brick walls, `chorus_flower`, `chorus_plant`,
+  `dragon_egg`, bamboo and cherry buttons, `sculk_vein`); 19 empty `data`
+  files were removed. 319 states and 212 data files now ship.
+- Fixed transparent layers drawn as solid black: the layer is emitted in the
+  host block's render type, so hosts that rendered as `solid` (walls,
+  stairs, ...) turned the transparent pixels of the lichen texture black.
+  They are now rendered on the layer's declared render type (`cutout`), and
+  models that split their quads per render type (multipart walls) no longer
+  lose geometry.
+
 ## 1.5.2.2
 
 - Layer types can now render a vanilla block state instead of a custom model.

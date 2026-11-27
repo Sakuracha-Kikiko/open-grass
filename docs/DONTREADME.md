@@ -14,7 +14,7 @@ Minecraft 1.21.1 / NeoForge（21.1.x）上的移植。上游按 Quilt + Fabric R
 | FRAPI `spriteBake(sprite, BAKE_LOCK_UV)` | `LBGQuadUtil#withSprite`：把顶点 UV（int 偏移 4、5）重映射到 `sprite.getU(u / 16f)` |
 | FRAPI `materialFinder().ambientOcclusion(FALSE)` | `new BakedQuad(vertices, tint, dir, sprite, shade, false)` |
 | `world.getBlockState(pos)` 由 FRAPI 直接传入 | `getModelData(level, pos, state, data)` 写入 `LBGData.BLOCK_CONTEXT`，渲染期取出 |
-| `BlockRenderLayerMap.put` 全局改层 | 包装模型的 `getRenderTypes(...)` 返回 `ChunkRenderTypeSet` |
+| `BlockRenderLayerMap.put` 全局改层 | 包装宿主方块的 `getRenderTypes(...)` 返回 `ChunkRenderTypeSet`，并让 `getQuads` 忽略 render type 参数把 quad 全交出去 |
 | `InMemoryResourcePack` + 强制 resource reload | 自定义 `SpriteSource`（`open_grass:generated`）+ 自带 `assets/minecraft/atlases/blocks.json` |
 | `ModelVariantMap.fromJson`（内联 block_state） | `BlockModelDefinition.fromStream(Context#setDefinition(...))` + `IModelBakerExtension#bakeUncached` |
 | `BlockBehaviour#getModelOffset` / `isSideSolidFullSquare` | `getOffset` / `isFaceSturdy(..., SupportType.FULL)` |
@@ -45,35 +45,45 @@ com.sakuracha.opengrass
 - **`getModelData` 上的额外修复**：上游 FRAPI 直接把 `world`/`pos` 传给 `emitBlockQuads`；
   NeoForge 只能经 `ModelData` 传递，因此 `LBGBakedModel` 与 `LBGLayerBakedModel` 都会写入
   `LBGData.BLOCK_CONTEXT`（栅栏、苔藓地毯这类 `layer` 状态的外层包装正是后者）。
+- **新增 `glow_lichen` 层类型**：幽匿脉络之外的第二种“底部贴面”层，数据里只有一份 JSON。
 - **层类型改为渲染原版方块状态**：1.5.2 给每种层烘焙一份自定义模型（`snowy_layer`、`mossy_layer`、
   `sculky_layer`），换资源包不会跟着变，剔除行为也不好；这里改成直接渲染该层对应的原版方块状态
   （见下面的「layer type 格式」），三个自定义模型文件随之删除。
-- **`layer_types/ash.json`** 指向 `cinderscapes:ash`，未安装时自动跳过（日志里只加载 3 个 layer type）。
+- **`layer_types/ash.json`** 指向 `cinderscapes:ash`，未安装时自动跳过（日志里只加载 4 个 layer type）。
 - **1.21.1 改名**：`states/grass.json`、`data/grass.json` 已按 `short_grass` 处理；
   上游 `resourcepacks/default` 里的 `materialmaps` 是 Canvas 渲染器的材质映射（不是 OptiFine），已移除；
   该内置包的内容已并入模组 assets（见下面的「关于「资源包」」）。
 - **`cave_vines_head`、`skeleton_head`、`weeping_wines`、`wither_skeleton_head`** 并不存在对应方块，加载时跳过
-  （272 = 276 − 4，与上游 1.20.1 上的行为一致）。
+  （315 = 319 − 4，与上游 1.20.1 上的行为一致）。
 
 ## layer type 格式
 
-`assets/open_grass/bettergrass/layer_types/*.json` 定义一个「覆盖层」（雪、苔藓、幽匿脉络……）：
+`assets/open_grass/bettergrass/layer_types/*.json` 定义一个「覆盖层」（雪、苔藓、幽匿脉络、发光地衣……）：
 
 | 键 | 说明 |
 | --- | --- |
 | `block` | 必填，该层对应的方块；也用于读取默认渲染层 |
 | `display` | 实际渲染的方块状态，如 `minecraft:sculk_vein[down=true]`；缺省为 `block` 的默认状态 |
-| `match` | 哪些方块算作这一层，可写方块 id 或 `#tag`，也可写成数组；缺省只匹配 `block` 本身 |
+| `match` | 哪些方块算作这一层，可写方块 id、`#tag` 或带属性的选择器（如 `minecraft:glow_lichen[down=true]`），也可写成数组；缺省只匹配 `block` 本身 |
 | `model` | 旧格式：改用自定义模型渲染（1.5.2 的写法，保留以兼容旧资源包） |
-| `render_layer` | 旧格式：`block` 的渲染层不在 `accepted` 里时强制改成 `default` |
+| `render_layer` | 改写**宿主方块**的渲染层：宿主当前的渲染层既不是 `default` 也不在 `accepted` 里时，把它的模型改成用 `default` 渲染（`solid` 会把透明像素画成黑色，因此需要 cutout） |
 
-本移植的三个层都用 `display`：
+本移植的四个层都用 `display`：
 
 - `snow` → `minecraft:snow`（默认 `layers=1`，2px 厚）
 - `moss` → `minecraft:moss_carpet`
 - `sculk` → `minecraft:sculk_vein[down=true]`（原版模型旋转 90° 后的贴面，落在方块底部 2px 处）
+- `glow_lichen` → `minecraft:glow_lichen[down=true]`（同样是底部贴面）
 
 这样覆盖层完全跟随资源包：换了材质包、改了方块模型，层也跟着变；也不用再自己维护一份模型。
+
+关于 `render_layer`：层 quad 是发进宿主方块那一个 render type 的，`solid` 没有 alpha test，
+`glow_lichen` 这种带透明像素的贴图会被画成大片黑色，所以这两个层都声明了
+`{"accepted": ["cutout", "cutout_mipped", "translucent", "tripwire"], "default": "cutout"}`：
+宿主（墙、台阶等）通常是 `solid`，会被换成 `cutout` 渲染。换渲染层有个副作用——`multipart` 模型
+（墙、`glow_lichen` 方块本身）会按部件自己的 render type 过滤 quad，一旦外层强制成 `cutout`，
+`solid` 的部件就全被滤掉、方块整个消失；因此 `LBGRenderTypeBakedModel` 把 5 参 `getQuads` 收到的
+`renderType` 参数丢弃，直接返回全部 quad（该模型只会在一个 render type 里渲染，这样做是安全的）。
 
 ## 关于「资源包」
 
@@ -117,9 +127,10 @@ export JAVA_HOME=/path/to/jdk21
 ./gradlew runClient      # 开发客户端
 ```
 
-- 日志应有 `Loaded 272 better grass states and 3 layer types.`，且没有 `Failed to retrieve texture` 警告。
+- 日志应有 `Loaded 315 better grass states and 4 layer types.`，且没有 `Failed to retrieve texture` 警告。
 - 渲染效果需要进游戏目视确认：`FANCY` 下草方块台阶的侧面应被草贴图覆盖（`OFF` 下是泥土），
-  雪地上的栅栏顶部与横杆应有积雪层，`sculk_vein` 周围方块的底部应铺满幽匿贴图。
+  雪地上的栅栏顶部与横杆应有积雪层，`sculk_vein` 周围方块的底部应铺满幽匿贴图，
+  `glow_lichen` 附近的石墙底部应透出带镂空的灰绿色贴图（不能是黑块）。
 
 ## 尚未完成 / 已知限制
 

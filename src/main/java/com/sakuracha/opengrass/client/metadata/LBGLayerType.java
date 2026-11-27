@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,6 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
  *     <li>{@code display}: the block state rendered as the layer, defaults to the default state of {@code block};</li>
  *     <li>{@code match}: the blocks which count as this layer, either block identifiers, block states with
  *     properties (for example {@code minecraft:glow_lichen[down=true]}), or {@code #tags},
- *     defaults to {@code block} only;</li>
  *     defaults to {@code block} only;</li>
  *     <li>{@code model}: a legacy custom model rendered instead of {@code display}.</li>
  * </ul>
@@ -60,11 +59,9 @@ public final class LBGLayerType {
     private final String name;
     private final Set<RenderType> acceptedRenderLayers;
     private final @Nullable RenderType defaultRenderLayer;
-    private final @Nullable RenderType forcedRenderLayer;
 
     private LBGLayerType(ResourceLocation id, Block block, BlockState displayState, @Nullable ResourceLocation legacyModelId,
-            Predicate<BlockState> matcher, Set<RenderType> acceptedRenderLayers, @Nullable RenderType defaultRenderLayer,
-            @Nullable RenderType forcedRenderLayer) {
+            Predicate<BlockState> matcher, Set<RenderType> acceptedRenderLayers, @Nullable RenderType defaultRenderLayer) {
         this.id = id;
         this.block = block;
         this.displayState = displayState;
@@ -73,7 +70,6 @@ public final class LBGLayerType {
         this.name = id.getPath().substring(id.getPath().lastIndexOf('/') + 1);
         this.acceptedRenderLayers = acceptedRenderLayers;
         this.defaultRenderLayer = defaultRenderLayer;
-        this.forcedRenderLayer = forcedRenderLayer;
     }
 
     public ResourceLocation id() {
@@ -120,8 +116,28 @@ public final class LBGLayerType {
         return this.defaultRenderLayer;
     }
 
-    public @Nullable RenderType forcedRenderLayer() {
-        return this.forcedRenderLayer;
+    /**
+     * Returns the render type a block has to be rendered with so this layer can be rendered over it, or
+     * {@code null} if the block is already rendered with a suitable render type.
+     *
+     * <p>The layer is emitted in the render type of the block it covers, so a block rendered as solid would
+     * render the transparent parts of the layer texture as black.</p>
+     *
+     * @param currentRenderTypes the render types the covered block is currently rendered with
+     * @return the render type to force, or {@code null} if none is needed
+     */
+    public @Nullable RenderType renderTypeFor(ChunkRenderTypeSet currentRenderTypes) {
+        if (this.defaultRenderLayer == null || currentRenderTypes.contains(this.defaultRenderLayer)) {
+            return null;
+        }
+
+        for (var renderType : this.acceptedRenderLayers) {
+            if (currentRenderTypes.contains(renderType)) {
+                return null;
+            }
+        }
+
+        return this.defaultRenderLayer;
     }
 
     public static void load(ResourceLocation resourceId, JsonObject json) {
@@ -173,15 +189,7 @@ public final class LBGLayerType {
             }
         }
 
-        RenderType forcedRenderLayer = null;
-        if (defaultRenderLayer != null) {
-            var currentRenderLayer = ItemBlockRenderTypes.getChunkRenderType(block.defaultBlockState());
-            if (currentRenderLayer != defaultRenderLayer && !accepted.contains(currentRenderLayer)) {
-                forcedRenderLayer = defaultRenderLayer;
-            }
-        }
-
-        LBGData.layerTypes().add(new LBGLayerType(id, block, displayState, legacyModelId, matcher, accepted, defaultRenderLayer, forcedRenderLayer));
+        LBGData.layerTypes().add(new LBGLayerType(id, block, displayState, legacyModelId, matcher, accepted, defaultRenderLayer));
     }
 
     private static BlockState parseDisplayState(ResourceLocation id, Block block, JsonObject json) {
