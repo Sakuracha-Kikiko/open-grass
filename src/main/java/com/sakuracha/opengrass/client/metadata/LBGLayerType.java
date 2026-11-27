@@ -21,6 +21,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,7 +32,9 @@ import org.jetbrains.annotations.Nullable;
  * <ul>
  *     <li>{@code block}: the block the layer type is about, also used as the default match and for the render layer;</li>
  *     <li>{@code display}: the block state rendered as the layer, defaults to the default state of {@code block};</li>
- *     <li>{@code match}: the blocks which count as this layer, either block identifiers or {@code #tags},
+ *     <li>{@code match}: the blocks which count as this layer, either block identifiers, block states with
+ *     properties (for example {@code minecraft:glow_lichen[down=true]}), or {@code #tags},
+ *     defaults to {@code block} only;</li>
  *     defaults to {@code block} only;</li>
  *     <li>{@code model}: a legacy custom model rendered instead of {@code display}.</li>
  * </ul>
@@ -224,13 +227,54 @@ public final class LBGLayerType {
                 var tag = TagKey.create(Registries.BLOCK, tagId);
                 matchers.add(state -> state.is(tag));
             } else {
-                var other = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.parse(value)).orElse(null);
+                var propertiesStart = value.indexOf('[');
+                var blockValue = propertiesStart >= 0 ? value.substring(0, propertiesStart) : value;
+                var other = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(blockValue)).orElse(null);
                 if (other == null || other == Blocks.AIR) {
                     OpenGrass.LOGGER.warn("Unknown block '{}' in the match list of layer type {}.", value, id);
                     continue;
                 }
 
-                matchers.add(state -> state.getBlock() == other);
+                if (propertiesStart < 0) {
+                    matchers.add(state -> state.getBlock() == other);
+                    continue;
+                }
+
+                var propertyMatchers = new ArrayList<Predicate<BlockState>>();
+                var propertiesEnd = value.endsWith("]") ? value.length() - 1 : value.length();
+                boolean valid = true;
+                for (var propertyEntry : value.substring(propertiesStart + 1, propertiesEnd).split(",")) {
+                    var parts = propertyEntry.split("=", 2);
+                    if (parts.length != 2) {
+                        OpenGrass.LOGGER.warn("Invalid property '{}' in the match list of layer type {}.", propertyEntry, id);
+                        valid = false;
+                        break;
+                    }
+
+                    var property = other.getStateDefinition().getProperty(parts[0]);
+                    if (property == null || property.getValue(parts[1]).isEmpty()) {
+                        OpenGrass.LOGGER.warn("Unknown property '{}' in the match list of layer type {}.", propertyEntry, id);
+                        valid = false;
+                        break;
+                    }
+
+                    propertyMatchers.add(state -> state.getBlock() == other && hasProperty(state, property, parts[1]));
+                }
+
+                if (!valid) {
+                    continue;
+                }
+
+                var entryMatchers = List.copyOf(propertyMatchers);
+                matchers.add(state -> {
+                    for (var predicate : entryMatchers) {
+                        if (!predicate.test(state)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
             }
         }
 
@@ -248,6 +292,11 @@ public final class LBGLayerType {
 
             return false;
         };
+    }
+
+    private static <T extends Comparable<T>> boolean hasProperty(BlockState state, Property<T> property, String value) {
+        var parsed = property.getValue(value);
+        return parsed.isPresent() && parsed.get().equals(state.getValue(property));
     }
 
     public static @Nullable LBGLayerType fromName(String name) {

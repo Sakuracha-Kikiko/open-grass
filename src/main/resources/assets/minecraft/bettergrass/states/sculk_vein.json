@@ -1,0 +1,8 @@
+{
+  "type": "layer",
+  "variants": {
+    "down=false": {
+      "data": "minecraft:bettergrass/data/sculk_vein"
+    }
+  }
+}

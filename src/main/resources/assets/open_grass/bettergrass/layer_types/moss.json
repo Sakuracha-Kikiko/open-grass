@@ -1,5 +1,8 @@
 {
   "block": "minecraft:moss_carpet",
   "display": "minecraft:moss_carpet",
-  "match": [ "minecraft:moss_carpet" ]
+  "match": [
+    "minecraft:moss_carpet",
+    "minecraft:moss_block"
+  ]
 }

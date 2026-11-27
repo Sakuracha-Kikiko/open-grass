@@ -1,0 +1,16 @@
+{
+  "block": "minecraft:glow_lichen",
+  "display": "minecraft:glow_lichen[down=true]",
+  "match": [
+    "minecraft:glow_lichen[down=true]"
+  ],
+  "render_layer": {
+    "accepted": [
+      "cutout",
+      "cutout_mipped",
+      "translucent",
+      "tripwire"
+    ],
+    "default": "cutout"
+  }
+}

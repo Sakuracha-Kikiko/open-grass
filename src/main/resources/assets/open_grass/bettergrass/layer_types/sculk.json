@@ -1,5 +1,16 @@
 {
   "block": "minecraft:sculk_vein",
   "display": "minecraft:sculk_vein[down=true]",
-  "match": [ "minecraft:sculk_vein" ]
+  "match": [
+    "minecraft:sculk_vein[down=true]"
+  ],
+  "render_layer": {
+    "accepted": [
+      "cutout",
+      "cutout_mipped",
+      "translucent",
+      "tripwire"
+    ],
+    "default": "cutout"
+  }
 }

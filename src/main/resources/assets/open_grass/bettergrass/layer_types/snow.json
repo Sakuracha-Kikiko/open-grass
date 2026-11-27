@@ -1,5 +1,5 @@
 {
   "block": "minecraft:snow",
   "display": "minecraft:snow",
-  "match": [ "minecraft:snow" ]
+  "match": "#minecraft:snow"
 }
