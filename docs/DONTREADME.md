@@ -118,16 +118,12 @@ export JAVA_HOME=/path/to/jdk21
 ```
 
 - 日志应有 `Loaded 272 better grass states and 3 layer types.`，且没有 `Failed to retrieve texture` 警告。
-- `docs/screenshots/better_grass_fancy.png` 与 `vanilla_off.png` 是同一场景（草方块台阶）在
-  `FANCY` 与 `OFF` 下的对比：前者台阶侧面被草贴图完全覆盖，后者是原版泥土。
-- `docs/screenshots/better_snow_fence.png` 是雪地上的橡木栅栏，可见栅栏顶部与横杆上的积雪层
-  （来自并入模组 assets 的内联 `block_state` multipart 模型）。
-- `docs/screenshots/layer_sculk.png` 是幽匿脉络层的俯视图：四个 `sculk_vein` 方块围着一根圆石墙，
-  墙所在格子的底部同样被铺满——这层直接渲染原版 `minecraft:sculk_vein[down=true]`，不再用自定义模型。
+- 渲染效果需要进游戏目视确认：`FANCY` 下草方块台阶的侧面应被草贴图覆盖（`OFF` 下是泥土），
+  雪地上的栅栏顶部与横杆应有积雪层，`sculk_vein` 周围方块的底部应铺满幽匿贴图。
 
 ## 尚未完成 / 已知限制
 
-- 没有做单元测试；渲染验证靠上面的截图与日志。
+- 没有做单元测试；渲染验证靠日志与游戏内目视。
 - 上游 `resourcepacks/32x` 只有 `pack.mcmeta` + `pack.png`（512×512 图标）三个条目，是空壳占位包，本移植未复刻，因此资源包界面里看不到它。
 - 不支持 Canvas 渲染器的 `materialmaps`；上游那三份（`bamboo`、`bamboo_sapling`、`grass`）已删除，NeoForge 上没有对应机制。
 - 上游主 jar 还内置了 26 个 `assets/cinderscapes/bettergrass/states` + 26 个 `data` 兼容数据，本移植未搬运（只保留了 `layer_types/ash.json`）；未安装 Cinderscapes 时无影响。
